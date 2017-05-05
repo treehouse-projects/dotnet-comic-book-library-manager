@@ -1,8 +1,8 @@
-﻿using ComicBookLibraryManager.Models;
+﻿using ComicBookShared.Models;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
-namespace ComicBookLibraryManager.Data
+namespace ComicBookShared.Data
 {
     /// <summary>
     /// Entity Framework context class.

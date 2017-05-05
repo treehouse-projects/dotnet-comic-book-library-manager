@@ -1,8 +1,8 @@
-﻿using ComicBookLibraryManager.Models;
+﻿using ComicBookShared.Models;
 using System;
 using System.Data.Entity;
 
-namespace ComicBookLibraryManager.Data
+namespace ComicBookShared.Data
 {
     /// <summary>
     /// Custom database initializer class used to populate

@@ -1,10 +1,10 @@
-﻿using ComicBookLibraryManager.Models;
+﻿using ComicBookShared.Models;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 
-namespace ComicBookLibraryManager.Data
+namespace ComicBookShared.Data
 {
     /// <summary>
     /// Repository class that provides various database queries

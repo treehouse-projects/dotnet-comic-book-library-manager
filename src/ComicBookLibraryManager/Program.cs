@@ -1,6 +1,6 @@
-﻿using ComicBookLibraryManager.Data;
+﻿using ComicBookShared.Data;
 using ComicBookLibraryManager.Helpers;
-using ComicBookLibraryManager.Models;
+using ComicBookShared.Models;
 using System;
 using System.Collections.Generic;
 
