@@ -1,0 +1,23 @@
+﻿@model ComicBookShared.Models.Series
+
+<div class="row">
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Title, new { @class = "control-label" })
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Description, new { @class = "control-label" })
+            @Html.TextAreaFor(m => m.Description, 14, 20, new { @class = "form-control" })
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,41 @@
+﻿@model List<ComicBookShared.Models.ComicBook>
+
+@{
+    ViewBag.Title = "Comic Books";
+}
+
+@Html.Partial("_Message")
+
+<h2>@ViewBag.Title</h2>
+
+<div class="pull-right">
+    <a href="@Url.Action("Add")" class="btn btn-primary btn-lg">
+        <span class="glyphicon glyphicon-plus"></span> Add Comic Book
+    </a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Comic Book</th>
+            <th>Published On</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var comicBook in Model)
+        {
+            <tr>
+                <td>@comicBook.DisplayText</td>
+                <td>@comicBook.PublishedOn.ToString("MM/dd/yyyy")</td>
+                <td>
+                    <div class="pull-right">
+                        <a href="@Url.Action("Detail", new { id = comicBook.Id })" class="btn btn-primary btn-xs margin-right">
+                            <span class="glyphicon glyphicon-info-sign"></span><span class="hidden-xs"> Detail</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

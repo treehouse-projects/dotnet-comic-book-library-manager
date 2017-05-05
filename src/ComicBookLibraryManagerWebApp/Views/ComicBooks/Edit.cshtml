@@ -1,0 +1,29 @@
+﻿@model ComicBookLibraryManagerWebApp.ViewModels.ComicBooksEditViewModel
+
+@{
+    ViewBag.Title = "Edit Comic Book";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary("The following errors were found:", new { @class = "alert alert-danger" })
+
+    <h3>Main Information</h3>
+
+    @Html.Partial("_ComicBookForm")
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pad-top">
+                <button type="submit" class="btn btn-success btn-lg margin-right">
+                    <span class="glyphicon glyphicon-save"></span> Save
+                </button>
+                <a href="@Url.Action("Detail", new { id = Model.Id })" class="btn btn-warning btn-lg">
+                    <span class="glyphicon glyphicon-remove"></span> Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+}

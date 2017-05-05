@@ -1,0 +1,35 @@
+﻿@model ComicBookLibraryManagerWebApp.ViewModels.ComicBookArtistsAddViewModel
+
+@{
+    ViewBag.Title = "Add Comic Book Artist";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<h3>@Model.ComicBook.DisplayText</h3>
+
+<p>Select an artist and role to add to this comic book.</p>
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary("The following errors were found:", new { @class = "alert alert-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.ArtistId, new { @class = "control-label" })
+        @Html.DropDownListFor(m => m.ArtistId,
+            Model.ArtistSelectListItems, "", new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.RoleId, new { @class = "control-label" })
+        @Html.DropDownListFor(m => m.RoleId,
+            Model.RoleSelectListItems, "", new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-success btn-lg margin-right">
+        <span class="glyphicon glyphicon-save"></span> Save
+    </button>
+    <a href="@Url.Action("Detail", "ComicBooks", new { id = Model.ComicBookId })" class="btn btn-warning btn-lg">
+        <span class="glyphicon glyphicon-remove"></span> Cancel
+    </a>
+}

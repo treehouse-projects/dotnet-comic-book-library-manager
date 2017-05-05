@@ -50,5 +50,19 @@ namespace ComicBookShared.Models
                 Role = role
             });
         }
+
+        /// <summary>
+        /// Adds an artist to the comic book.
+        /// </summary>
+        /// <param name="artistId">The artist ID to add.</param>
+        /// <param name="roleId">The role ID that the artist had on this comic book.</param>
+        public void AddArtist(int artistId, int roleId)
+        {
+            Artists.Add(new ComicBookArtist()
+            {
+                ArtistId = artistId,
+                RoleId = roleId
+            });
+        }
     }
 }

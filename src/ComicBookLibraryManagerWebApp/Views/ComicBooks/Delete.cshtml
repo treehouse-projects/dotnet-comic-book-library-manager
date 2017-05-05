@@ -1,0 +1,23 @@
+﻿@model ComicBookShared.Models.ComicBook
+
+@{
+    ViewBag.Title = "Delete Comic Book";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete the comic book @Model.DisplayText?
+</div>
+
+@using (Html.BeginForm())
+{
+    <div class="pad-top">
+        <button type="submit" class="btn btn-danger btn-lg margin-right">
+            <span class="glyphicon glyphicon-trash"></span> Delete
+        </button>
+        <a href="@Url.Action("Detail", new { id = Model.Id })" class="btn btn-warning btn-lg">
+            <span class="glyphicon glyphicon-remove"></span> Cancel
+        </a>
+    </div>
+}

@@ -1,0 +1,39 @@
+﻿@model ComicBookLibraryManagerWebApp.ViewModels.ComicBooksBaseViewModel
+
+<div class="row">
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ComicBook.SeriesId, new { @class = "control-label" })
+            @Html.DropDownListFor(m => m.ComicBook.SeriesId,
+            Model.SeriesSelectListItems, "", new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ComicBook.IssueNumber, new { @class = "control-label" })
+            @Html.TextBoxFor(m => m.ComicBook.IssueNumber, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ComicBook.PublishedOn, new { @class = "control-label" })
+            @Html.TextBoxFor(m => m.ComicBook.PublishedOn, "{0:d}", new { @class = "form-control datepicker" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ComicBook.AverageRating, new { @class = "control-label" })
+            @Html.TextBoxFor(m => m.ComicBook.AverageRating, "{0:n1}", new { @class = "form-control" })
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ComicBook.Description, new { @class = "control-label" })
+            @Html.TextAreaFor(m => m.ComicBook.Description, 14, 20, new { @class = "form-control" })
+        </div>
+
+    </div>
+
+</div>
