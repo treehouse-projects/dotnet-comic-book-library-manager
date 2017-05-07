@@ -38,10 +38,10 @@ namespace ComicBookLibraryManagerWebApp.ViewModels
         public void Init()
         {
             ArtistSelectListItems = new SelectList(
-                new List<Artist>(),
+                new List<Artist>(), // TODO Get the artists list.
                 "Id", "Name");
             RoleSelectListItems = new SelectList(
-                new List<Role>(),
+                new List<Role>(),  // TODO Get the roles list.
                 "Id", "Name");
         }
     }
