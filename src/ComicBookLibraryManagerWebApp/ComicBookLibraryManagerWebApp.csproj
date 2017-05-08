@@ -145,6 +145,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ArtistsController.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ComicBookArtistsController.cs" />
     <Compile Include="Controllers\ComicBooksController.cs" />
     <Compile Include="Controllers\SeriesController.cs" />
