@@ -1,194 +1,127 @@
 ﻿using ComicBookShared.Models;
+using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace ComicBookShared.Data
 {
-    /// <summary>
-    /// Repository class that provides various database queries
-    /// and CRUD operations.
-    /// </summary>
-    public static class Repository
+    public class Repository
     {
-        /// <summary>
-        /// Private method that returns a database context.
-        /// </summary>
-        /// <returns>An instance of the Context class.</returns>
-        static Context GetContext()
+        private Context _context = null;
+
+        public Repository(Context context)
         {
-            var context = new Context();
-            context.Database.Log = (message) => Debug.WriteLine(message);
-            return context;
+            _context = context;
         }
 
-        /// <summary>
-        /// Returns a count of the comic books.
-        /// </summary>
-        /// <returns>An integer count of the comic books.</returns>
-        public static int GetComicBookCount()
+        public IList<ComicBook> GetComicBooks()
         {
-            using (Context context = GetContext())
-            {
-                return context.ComicBooks.Count();
-            }
+            return _context.ComicBooks
+                .Include(cb => cb.Series)
+                .OrderBy(cb => cb.Series.Title)
+                .ThenBy(cb => cb.IssueNumber)
+                .ToList();
         }
 
-        /// <summary>
-        /// Returns a list of comic books ordered by the series title 
-        /// and issue number.
-        /// </summary>
-        /// <returns>An IList collection of ComicBook entity instances.</returns>
-        public static IList<ComicBook> GetComicBooks()
+        public ComicBook GetComicBook(int id, bool includeRelatedEntities = true)
         {
-            using (Context context = GetContext())
-            {
-                return context.ComicBooks
-                    .Include(cb => cb.Series)
-                    .OrderBy(cb => cb.Series.Title)
-                    .ThenBy(cb => cb.IssueNumber)
-                    .ToList();
-            }
-        }
+            var comicBooks = _context.ComicBooks.AsQueryable();
 
-        /// <summary>
-        /// Returns a single comic book.
-        /// </summary>
-        /// <param name="comicBookId">The comic book ID to retrieve.</param>
-        /// <returns>A fully populated ComicBook entity instance.</returns>
-        public static ComicBook GetComicBook(int comicBookId)
-        {
-            using (Context context = GetContext())
+            if (includeRelatedEntities)
             {
-                return context.ComicBooks
+                comicBooks = comicBooks
                     .Include(cb => cb.Series)
                     .Include(cb => cb.Artists.Select(a => a.Artist))
-                    .Include(cb => cb.Artists.Select(a => a.Role))
-                    .Where(cb => cb.Id == comicBookId)
-                    .SingleOrDefault();
+                    .Include(cb => cb.Artists.Select(a => a.Role));
             }
+
+            return comicBooks
+                .Where(cb => cb.Id == id)
+                .SingleOrDefault();
         }
 
-        /// <summary>
-        /// Returns a list of series ordered by title.
-        /// </summary>
-        /// <returns>An IList collection of Series entity instances.</returns>
-        public static IList<Series> GetSeries()
+        public void AddComicBook(ComicBook comicBook)
         {
-            using (Context context = GetContext())
-            {
-                return context.Series
-                    .OrderBy(s => s.Title)
-                    .ToList();
-            }
+            _context.ComicBooks.Add(comicBook);
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// Returns a single series.
-        /// </summary>
-        /// <param name="seriesId">The series ID to retrieve.</param>
-        /// <returns>A Series entity instance.</returns>
-        public static Series GetSeries(int seriesId)
+        public void UpdateComicBook(ComicBook comicBook)
         {
-            using (Context context = GetContext())
-            {
-                return context.Series
-                    .Where(s => s.Id == seriesId)
-                    .SingleOrDefault();
-            }
+            _context.Entry(comicBook).State = EntityState.Modified;
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// Returns a list of artists ordered by name.
-        /// </summary>
-        /// <returns>An IList collection of Artist entity instances.</returns>
-        public static IList<Artist> GetArtists()
+        public void DeleteComicBook(int id)
         {
-            using (Context context = GetContext())
-            {
-                return context.Artists
-                    .OrderBy(a => a.Name)
-                    .ToList();
-            }
+            var comicBook = new ComicBook() { Id = id };
+            _context.Entry(comicBook).State = EntityState.Deleted;
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// Returns a list of roles ordered by name.
-        /// </summary>
-        /// <returns>An IList collection of Role entity instances.</returns>
-        public static IList<Role> GetRoles()
+        public bool ComicBookSeriesHasIssueNumber(
+            int comicBookId, int seriesId, int issueNumber)
         {
-            using (Context context = GetContext())
-            {
-                return context.Roles
-                    .OrderBy(r => r.Name)
-                    .ToList();
-            }
+            return _context.ComicBooks
+                .Any(cb => cb.Id != comicBookId &&
+                           cb.SeriesId == seriesId &&
+                           cb.IssueNumber == issueNumber);
         }
 
-        /// <summary>
-        /// Adds a comic book.
-        /// </summary>
-        /// <param name="comicBook">The ComicBook entity instance to add.</param>
-        public static void AddComicBook(ComicBook comicBook)
+        public ComicBookArtist GetComicBookArtist(int id)
         {
-            using (Context context = GetContext())
-            {
-                context.ComicBooks.Add(comicBook);
-
-                if (comicBook.Series != null && comicBook.Series.Id > 0)
-                {
-                    context.Entry(comicBook.Series).State = EntityState.Unchanged;
-                }
-
-                foreach (ComicBookArtist artist in comicBook.Artists)
-                {
-                    if (artist.Artist != null && artist.Artist.Id > 0)
-                    {
-                        context.Entry(artist.Artist).State = EntityState.Unchanged;
-                    }
-
-                    if (artist.Role != null && artist.Role.Id > 0)
-                    {
-                        context.Entry(artist.Role).State = EntityState.Unchanged;
-                    }
-                }
-
-                context.SaveChanges();
-            }
+            return _context.ComicBookArtists
+                .Include(cba => cba.Artist)
+                .Include(cba => cba.Role)
+                .Include(cba => cba.ComicBook.Series)
+                .Where(cba => cba.Id == id)
+                .SingleOrDefault();
         }
 
-        /// <summary>
-        /// Updates a comic book.
-        /// </summary>
-        /// <param name="comicBook">The ComicBook entity instance to update.</param>
-        public static void UpdateComicBook(ComicBook comicBook)
+        public void AddComicBookArtist(ComicBookArtist comicBookArtist)
         {
-            using (Context context = GetContext())
-            {
-                context.ComicBooks.Attach(comicBook);
-                var comicBookEntry = context.Entry(comicBook);
-                comicBookEntry.State = EntityState.Modified;
-                //comicBookEntry.Property("IssueNumber").IsModified = false;
-
-                context.SaveChanges();
-            }
+            _context.ComicBookArtists.Add(comicBookArtist);
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// Deletes a comic book.
-        /// </summary>
-        /// <param name="comicBookId">The comic book ID to delete.</param>
-        public static void DeleteComicBook(int comicBookId)
+        public void DeleteComicBookArtist(int id)
         {
-            using (Context context = GetContext())
-            {
-                var comicBook = new ComicBook() { Id = comicBookId };
-                context.Entry(comicBook).State = EntityState.Deleted;
+            var comicBookArtist = new ComicBookArtist() { Id = id };
+            _context.Entry(comicBookArtist).State = EntityState.Deleted;
+            _context.SaveChanges();
+        }
 
-                context.SaveChanges();
-            }
+        public bool ComicBookHasArtistRoleCombination(
+            int comicBookId, int artistId, int roleId)
+        {
+            return _context.ComicBookArtists
+                .Any(cba => cba.ComicBookId == comicBookId &&
+                            cba.ArtistId == artistId &&
+                            cba.RoleId == roleId);
+        }
+
+        public IList<Series> GetSeriesList()
+        {
+            return _context.Series
+                .OrderBy(s => s.Title)
+                .ToList();
+        }
+
+        public IList<Artist> GetArtists()
+        {
+            return _context.Artists
+                .OrderBy(a => a.Name)
+                .ToList();
+        }
+
+        public IList<Role> GetRoles()
+        {
+            return _context.Roles
+                .OrderBy(r => r.Name)
+                .ToList();
         }
     }
 }
