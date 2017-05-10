@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BaseRepository.cs" />
     <Compile Include="Data\ComicBookArtistsRepository.cs" />
     <Compile Include="Data\ComicBooksRepository.cs" />
     <Compile Include="Data\Context.cs" />
