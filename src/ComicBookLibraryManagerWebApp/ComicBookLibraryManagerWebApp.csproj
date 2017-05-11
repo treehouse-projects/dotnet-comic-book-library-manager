@@ -147,6 +147,7 @@
     <Compile Include="Controllers\ArtistsController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ComicBookArtistsController.cs" />
+    <Compile Include="Controllers\ComicBookArtistsController_QueriesAndCommands.cs" />
     <Compile Include="Controllers\ComicBooksController.cs" />
     <Compile Include="Controllers\SeriesController.cs" />
     <Compile Include="Global.asax.cs">
