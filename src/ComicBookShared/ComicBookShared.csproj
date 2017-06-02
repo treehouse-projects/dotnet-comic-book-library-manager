@@ -47,16 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\ArtistsRepository.cs" />
-    <Compile Include="Data\BaseRepository.cs" />
-    <Compile Include="Data\ComicBookArtistsRepository.cs" />
-    <Compile Include="Data\ComicBooksRepository.cs" />
     <Compile Include="Data\Commands\AddComicBookArtistCommand.cs" />
     <Compile Include="Data\Context.cs" />
     <Compile Include="Data\DatabaseInitializer.cs" />
+    <Compile Include="Data\Queries\GetArtistListQuery.cs" />
+    <Compile Include="Data\Queries\GetArtistQuery.cs" />
     <Compile Include="Data\Queries\GetComicBookQuery.cs" />
-    <Compile Include="Data\Repository.cs" />
-    <Compile Include="Data\SeriesRepository.cs" />
+    <Compile Include="Data\Queries\GetRoleListQuery.cs" />
+    <Compile Include="Data\Queries\GetSeriesListQuery.cs" />
+    <Compile Include="Data\Queries\GetSeriesQuery.cs" />
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\ComicBook.cs" />
     <Compile Include="Models\ComicBookArtist.cs" />

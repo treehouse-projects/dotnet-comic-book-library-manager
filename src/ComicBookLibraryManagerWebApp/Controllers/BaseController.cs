@@ -12,12 +12,10 @@ namespace ComicBookLibraryManagerWebApp.Controllers
         private bool _disposed = false;
 
         protected Context Context { get; private set; }
-        protected Repository Repository { get; private set; }
 
         public BaseController()
         {
             Context = new Context();
-            Repository = new Repository(Context);
         }
 
         protected override void Dispose(bool disposing)

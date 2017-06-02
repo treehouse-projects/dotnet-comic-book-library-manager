@@ -17,12 +17,19 @@ namespace ComicBookShared.Data.Queries
             _context = context;
         }
 
-        public ComicBook Execute(int id)
+        public ComicBook Execute(int id, bool includeRelatedEntities = true)
         {
-            return _context.ComicBooks
-                .Include(cb => cb.Series)
-                .Include(cb => cb.Artists.Select(a => a.Artist))
-                .Include(cb => cb.Artists.Select(a => a.Role))
+            var comicBooks = _context.ComicBooks.AsQueryable();
+
+            if (includeRelatedEntities)
+            {
+                comicBooks = comicBooks
+                    .Include(cb => cb.Series)
+                    .Include(cb => cb.Artists.Select(a => a.Artist))
+                    .Include(cb => cb.Artists.Select(a => a.Role));
+            }
+
+            return comicBooks
                 .Where(cb => cb.Id == id)
                 .SingleOrDefault();
         }

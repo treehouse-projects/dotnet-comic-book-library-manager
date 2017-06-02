@@ -1,122 +1,112 @@
-﻿//using ComicBookLibraryManagerWebApp.ViewModels;
-//using ComicBookShared.Data;
-//using ComicBookShared.Models;
-//using System;
-//using System.Collections.Generic;
-//using System.Data.Entity;
-//using System.Linq;
-//using System.Net;
-//using System.Web;
-//using System.Web.Mvc;
+﻿using ComicBookLibraryManagerWebApp.ViewModels;
+using ComicBookShared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+using ComicBookShared.Data.Queries;
+using ComicBookShared.Data.Commands;
+using ComicBookShared.Data;
 
-//namespace ComicBookLibraryManagerWebApp.Controllers
-//{
-//    /// <summary>
-//    /// Controller for adding/deleting comic book artists.
-//    /// </summary>
-//    public class ComicBookArtistsController : BaseController
-//    {
-//        private ComicBooksRepository _comicBooksRepository = null;
-//        private ComicBookArtistsRepository _comicBookArtistsRepository = null;
+namespace ComicBookLibraryManagerWebApp.Controllers
+{
+    public class ComicBookArtistsController : BaseController
+    {
+        public ActionResult Add(int comicBookId)
+        {
+            var comicBook = new GetComicBookQuery(Context).Execute(comicBookId);
 
-//        public ComicBookArtistsController()
-//        {
-//            _comicBooksRepository = new ComicBooksRepository(Context);
-//            _comicBookArtistsRepository = new ComicBookArtistsRepository(Context);
-//        }
+            if (comicBook == null)
+            {
+                return HttpNotFound();
+            }
 
-//        public ActionResult Add(int comicBookId)
-//        {
-//            var comicBook = _comicBooksRepository.Get(comicBookId);
+            var viewModel = new ComicBookArtistsAddViewModel()
+            {
+                ComicBook = comicBook
+            };
 
-//            if (comicBook == null)
-//            {
-//                return HttpNotFound();
-//            }
+            viewModel.Init(Context);
 
-//            var viewModel = new ComicBookArtistsAddViewModel()
-//            {
-//                ComicBook = comicBook
-//            };
+            return View(viewModel);
+        }
 
-//            viewModel.Init(Repository);
+        [HttpPost]
+        public ActionResult Add(ComicBookArtistsAddViewModel viewModel)
+        {
+            ValidateComicBookArtist(viewModel);
 
-//            return View(viewModel);
-//        }
+            if (ModelState.IsValid)
+            {
+                new AddComicBookArtistCommand(Context)
+                    .Execute(viewModel.ComicBookId, viewModel.ArtistId, viewModel.RoleId);
 
-//        [HttpPost]
-//        public ActionResult Add(ComicBookArtistsAddViewModel viewModel)
-//        {
-//            ValidateComicBookArtist(viewModel);
+                TempData["Message"] = "Your artist was successfully added!";
 
-//            if (ModelState.IsValid)
-//            {
-//                var comicBookArtist = new ComicBookArtist()
-//                {
-//                    ComicBookId = viewModel.ComicBookId,
-//                    ArtistId = viewModel.ArtistId,
-//                    RoleId = viewModel.RoleId
-//                };
-//                _comicBookArtistsRepository.Add(comicBookArtist);
+                return RedirectToAction("Detail", "ComicBooks", new { id = viewModel.ComicBookId });
+            }
 
-//                TempData["Message"] = "Your artist was successfully added!";
+            viewModel.ComicBook = new GetComicBookQuery(Context)
+                .Execute(viewModel.ComicBookId);
+            viewModel.Init(Context);
 
-//                return RedirectToAction("Detail", "ComicBooks", new { id = viewModel.ComicBookId });
-//            }
+            return View(viewModel);
+        }
 
-//            viewModel.ComicBook = _comicBooksRepository.Get(viewModel.ComicBookId);
-//            viewModel.Init(Repository);
+        public ActionResult Delete(int comicBookId, int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
-//            return View(viewModel);
-//        }
+            var comicBookArtist = Context.ComicBookArtists
+                .Include(cba => cba.Artist)
+                .Include(cba => cba.Role)
+                .Include(cba => cba.ComicBook.Series)
+                .Where(cba => cba.Id == id)
+                .SingleOrDefault();
 
-//        public ActionResult Delete(int comicBookId, int? id)
-//        {
-//            if (id == null)
-//            {
-//                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-//            }
+            if (comicBookArtist == null)
+            {
+                return HttpNotFound();
+            }
 
-//            var comicBookArtist = _comicBookArtistsRepository.Get((int)id);
+            return View(comicBookArtist);
+        }
 
-//            if (comicBookArtist == null)
-//            {
-//                return HttpNotFound();
-//            }
+        [HttpPost]
+        public ActionResult Delete(int comicBookId, int id)
+        {
+            var comicBookArtist = new ComicBookArtist() { Id = id };
+            Context.Entry(comicBookArtist).State = EntityState.Deleted;
+            Context.SaveChanges();
 
-//            return View(comicBookArtist);
-//        }
+            TempData["Message"] = "Your artist was successfully deleted!";
 
-//        [HttpPost]
-//        public ActionResult Delete(int comicBookId, int id)
-//        {
-//            _comicBookArtistsRepository.Delete(id);
+            return RedirectToAction("Detail", "ComicBooks", new { id = comicBookId });
+        }
 
-//            TempData["Message"] = "Your artist was successfully deleted!";
-
-//            return RedirectToAction("Detail", "ComicBooks", new { id = comicBookId });
-//        }
-
-//        /// <summary>
-//        /// Validates a comic book artist on the server
-//        /// before adding a new record.
-//        /// </summary>
-//        /// <param name="viewModel">The view model containing the values to validate.</param>
-//        private void ValidateComicBookArtist(ComicBookArtistsAddViewModel viewModel)
-//        {
-//            // If there aren't any "ArtistId" and "RoleId" field validation errors...
-//            if (ModelState.IsValidField("ArtistId") &&
-//                ModelState.IsValidField("RoleId"))
-//            {
-//                // Then make sure that this artist and role combination 
-//                // doesn't already exist for this comic book.
-//                if (_comicBooksRepository.ComicBookHasArtistRoleCombination(
-//                        viewModel.ComicBookId, viewModel.ArtistId, viewModel.RoleId))
-//                {
-//                    ModelState.AddModelError("ArtistId",
-//                        "This artist and role combination already exists for this comic book.");
-//                }
-//            }
-//        }
-//    }
-//}
+        private void ValidateComicBookArtist(ComicBookArtistsAddViewModel viewModel)
+        {
+            // If there aren't any "ArtistId" and "RoleId" field validation errors...
+            if (ModelState.IsValidField("ArtistId") &&
+                ModelState.IsValidField("RoleId"))
+            {
+                // Then make sure that this artist and role combination 
+                // doesn't already exist for this comic book.
+                if (Context.ComicBookArtists
+                        .Any(cba => cba.ComicBookId == viewModel.ComicBookId &&
+                            cba.ArtistId == viewModel.ArtistId &&
+                            cba.RoleId == viewModel.RoleId))
+                {
+                    ModelState.AddModelError("ArtistId",
+                        "This artist and role combination already exists for this comic book.");
+                }
+            }
+        }
+    }
+}

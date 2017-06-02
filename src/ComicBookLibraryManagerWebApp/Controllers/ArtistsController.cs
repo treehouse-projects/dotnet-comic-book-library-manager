@@ -1,4 +1,5 @@
 ﻿using ComicBookShared.Data;
+using ComicBookShared.Data.Queries;
 using ComicBookShared.Models;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using System.Data.Entity;
 
 namespace ComicBookLibraryManagerWebApp.Controllers
 {
@@ -14,16 +16,10 @@ namespace ComicBookLibraryManagerWebApp.Controllers
     /// </summary>
     public class ArtistsController : BaseController
     {
-        private ArtistsRepository _artistsRepository = null;
-
-        public ArtistsController()
-        {
-            _artistsRepository = new ArtistsRepository(Context);
-        }
-
         public ActionResult Index()
         {
-            var artists = _artistsRepository.GetList();
+            var artists = new GetArtistListQuery(Context)
+                .Execute();
 
             return View(artists);
         }
@@ -35,7 +31,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var artist = _artistsRepository.Get((int)id);
+            var artist = new GetArtistQuery(Context)
+                .Execute((int)id);
 
             if (artist == null)
             {
@@ -65,7 +62,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                _artistsRepository.Add(artist);
+                Context.Artists.Add(artist);
+                Context.SaveChanges();
 
                 TempData["Message"] = "Your artist was successfully added!";
 
@@ -82,8 +80,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var artist = _artistsRepository.Get((int)id,
-                includeRelatedEntities: false);
+            var artist = new GetArtistQuery(Context)
+                .Execute((int)id, includeRelatedEntities: false);
 
             if (artist == null)
             {
@@ -100,7 +98,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                _artistsRepository.Update(artist);
+                Context.Entry(artist).State = EntityState.Modified;
+                Context.SaveChanges();
 
                 TempData["Message"] = "Your artist was successfully updated!";
 
@@ -117,7 +116,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var artist = _artistsRepository.Get((int)id);
+            var artist = new GetArtistQuery(Context)
+                .Execute((int)id);
 
             if (artist == null)
             {
@@ -130,7 +130,9 @@ namespace ComicBookLibraryManagerWebApp.Controllers
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            _artistsRepository.Delete(id);
+            var artist = new Artist() { Id = id };
+            Context.Entry(artist).State = EntityState.Deleted;
+            Context.SaveChanges();
 
             TempData["Message"] = "Your artist was successfully deleted!";
 
@@ -148,8 +150,8 @@ namespace ComicBookLibraryManagerWebApp.Controllers
             if (ModelState.IsValidField("Name"))
             {
                 // Then make sure that the provided name is unique.
-                if (_artistsRepository.ArtistHasName(
-                        artist.Id, artist.Name))
+                if (Context.Artists
+                        .Any(a => a.Id != artist.Id && a.Name == artist.Name))
                 {
                     ModelState.AddModelError("Name",
                         "The provided Name is in use by another artist.");

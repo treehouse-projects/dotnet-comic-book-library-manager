@@ -1,4 +1,5 @@
 ﻿using ComicBookShared.Data;
+using ComicBookShared.Data.Queries;
 using ComicBookShared.Models;
 using System;
 using System.Collections.Generic;
@@ -21,12 +22,10 @@ namespace ComicBookLibraryManagerWebApp.ViewModels
         /// <summary>
         /// Initializes the view model.
         /// </summary>
-        public virtual void Init(Repository repository,
-            SeriesRepository seriesRepository,
-            ArtistsRepository artistsRepository)
+        public virtual void Init(Context context)
         {
             SeriesSelectListItems = new SelectList(
-                seriesRepository.GetList(),
+                new GetSeriesListQuery(context).Execute(),
                 "Id", "Title");
         }
     }
